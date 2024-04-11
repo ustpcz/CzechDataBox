@@ -321,6 +321,97 @@ class DataBoxSimpleApi
 
 
     /**
+     * Vytvoří kompletní zprávu k odeslání
+     *
+     * @return tMessageCreateInput
+     * @throws DataBoxException
+     */
+    public function createCompleteDataMessage(
+        $dmSenderOrgUnit = null,
+        $dmSenderOrgUnitNum = null,
+        $dbIDRecipient = null,
+        $dmRecipientOrgUnit = null,
+        $dmRecipientOrgUnitNum = null,
+        $dmToHands = null,
+        $dmAnnotation = null,
+        $dmRecipientRefNumber = null,
+        $dmSenderRefNumber = null,
+        $dmRecipientIdent = null,
+        $dmSenderIdent = null,
+        $dmLegalTitleLaw = null,
+        $dmLegalTitleYear = null,
+        $dmLegalTitleSect = null,
+        $dmLegalTitlePar = null,
+        $dmLegalTitlePoint = null,
+        $dmPersonalDelivery = null,
+        $dmAllowSubstDelivery = null,
+        $dmOVM = null,
+        $dmPublishOwnID = null,
+        $dmType = null,
+        array $attachments = [],
+    ) {
+        if (!is_string($dbIDRecipient)) {
+            throw new DataBoxException("Invalid recipient data type provided");
+        } elseif (!is_string($dmAnnotation)) {
+            throw new DataBoxException("Invalid subject data type provided");
+        }
+
+        // Create an envelope, for some reason the dmEnvelope is not processed
+        // properly and returns an internal error
+        $envelope = new tMessageEnvelopeSub(
+            $dmSenderOrgUnit,
+            $dmSenderOrgUnitNum,
+            $dbIDRecipient,
+            $dmRecipientOrgUnit,
+            $dmRecipientOrgUnitNum,
+            $dmToHands,
+            $dmAnnotation,
+            $dmRecipientRefNumber,
+            $dmSenderRefNumber,
+            $dmRecipientIdent,
+            $dmSenderIdent,
+            $dmLegalTitleLaw,
+            $dmLegalTitleYear,
+            $dmLegalTitleSect,
+            $dmLegalTitlePar,
+            $dmLegalTitlePoint,
+            $dmPersonalDelivery,
+            $dmAllowSubstDelivery,
+            $dmOVM,
+            $dmPublishOwnID,
+            $dmType,
+        );
+
+        // Make sure the attachments exist. If you have files stored in the memory
+        // just do not pass any attachments and create the dmFile object yourself,
+        // then set it as an array to dmFiles
+        $attachments = array_filter($attachments, '\file_exists');
+
+        // Creates the dmFile object for each of the attachments, gets mime
+        // type and file name from the file
+        $attachments = array_map(
+            static function ($filePath) {
+                $file = new dmFile();
+                $file->setDmMimeType(mime_content_type($filePath));
+                $file->setDmFileDescr(basename($filePath));
+                $file->setDmEncodedContent(file_get_contents($filePath));
+                return $file;
+            },
+            $attachments,
+        );
+
+
+        $dmFiles = new tFilesArray();
+        if ($attachments !== []) {
+            // tFilesArray is not properly generated, it should accept an array of dmFile objects
+            $dmFiles->setDmFile($attachments);
+        }
+
+        return new tMessageCreateInput($envelope, $dmFiles);
+    }
+
+
+    /**
      * Pošle datovou zprávu.
      *
      *
