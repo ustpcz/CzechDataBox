@@ -133,11 +133,29 @@ class DmOperationsWebService extends \SoapClient
 
     /**
      * @param tIDMessInput $parameter
+     * @return tMessDownOutput
+     */
+    public function BigMessageDownload(tIDMessInput $parameter)
+    {
+        return $this->__soapCall('BigMessageDownload', array($parameter));
+    }
+
+    /**
+     * @param tIDMessInput $parameter
      * @return tSignedMessDownOutput
      */
     public function SignedMessageDownload(tIDMessInput $parameter)
     {
         return $this->__soapCall('SignedMessageDownload', array($parameter));
+    }
+
+    /**
+     * @param tIDMessInput $parameter
+     * @return tSignedMessDownOutput
+     */
+    public function SignedBidMessageDownload(tIDMessInput $parameter)
+    {
+        return $this->__soapCall('SignedBigMessageDownload', [$parameter]);
     }
 
     /**

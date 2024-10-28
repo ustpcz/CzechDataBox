@@ -35,6 +35,8 @@ class DataBoxHelper
      */
     public const STAT_WS = 4;
 
+    public const VODZ = 5;
+
     /**
      * Vrátí seznam všech WS včetně umístění WSDL souboru.
      *
@@ -50,6 +52,7 @@ class DataBoxHelper
             self::SEARCH_WS     => realpath($directory.'db_search.wsdl'),
             self::ACCESS_WS     => realpath($directory.'db_access.wsdl'),
             self::STAT_WS       => realpath($directory.'isds_stat.wsdl'),
+            self::VODZ          => realpath($directory.'dm_VoDZ.wsdl'),
         ];
     }
 

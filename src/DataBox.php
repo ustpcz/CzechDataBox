@@ -166,7 +166,11 @@ class DataBox
      */
     private function getServiceURL($serviceType)
     {
-        $res = 'https://ws1';
+        if ($serviceType == DataBoxHelper::VODZ) {
+            $res = 'https://ws2';
+        } else {
+            $res = 'https://ws1';
+        }
         if (0 !== $this->loginType) {
             $res .= 'c';
         }
@@ -197,6 +201,9 @@ class DataBox
             case DataBoxHelper::STAT_WS:
                 $res .= 'DsManage';
                 break;
+            case DataBoxHelper::VODZ:
+                $res .= 'vodz';
+                break;
         }
 
         $this->serviceUrl = $res;
@@ -224,6 +231,7 @@ class DataBox
             DataBoxHelper::SEARCH_WS => $directory.'db_search.wsdl',
             DataBoxHelper::ACCESS_WS => $directory.'db_access.wsdl',
             DataBoxHelper::STAT_WS => $directory.'isds_stat.wsdl',
+            DataBoxHelper::VODZ => $directory.'dm_VoDZ.wsdl',
             default => throw new DataBoxException(sprintf('Service type %s not implemented.', $serviceType)),
         };
     }
@@ -267,6 +275,16 @@ class DataBox
     public function DmOperationsWebService()
     {
         $this->setActualService(DataBoxHelper::OPERATIONS_WS);
+        $soap = new DmOperationsWebService($this->actualOptions, $this->actualWsdl);
+        $this->actualSoap = $soap;
+
+        return $soap;
+    }
+
+
+    public function DmVoDZ()
+    {
+        $this->setActualService(DataBoxHelper::VODZ);
         $soap = new DmOperationsWebService($this->actualOptions, $this->actualWsdl);
         $this->actualSoap = $soap;
 

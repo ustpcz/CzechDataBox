@@ -161,16 +161,21 @@ class DataBoxSimpleApi
      *
      * @throws DataBoxException
      */
-    public function downloadSignedReceivedMessage($dataMessageId)
+    public function downloadSignedReceivedMessage($dataMessageId, bool $vodz = false)
     {
         $file = $this->getLocationForMessage($dataMessageId, 'r');
         if (!$file->getIsExist()) {
-            $content = $this->dataBox->DmOperationsWebService()->SignedMessageDownload(
-                (new tIDMessInput())->setDmID($dataMessageId),
-            )->getDmSignature();
+            if ($vodz) {
+                $content = $this->dataBox->DmVoDZ()->SignedBidMessageDownload(
+                    (new tIDMessInput())->setDmID($dataMessageId),
+                )->getDmSignature();
+            } else {
+                $content = $this->dataBox->DmOperationsWebService()->SignedMessageDownload(
+                    (new tIDMessInput())->setDmID($dataMessageId),
+                )->getDmSignature();
+            }
             $file->save($content);
         }
-
         return $file;
     }
 
@@ -232,13 +237,19 @@ class DataBoxSimpleApi
      *
      * @throws DataBoxException
      */
-    public function getReceivedDataMessageAttachments($dataMessageId, $markAsDownloaded = false)
+    public function getReceivedDataMessageAttachments($dataMessageId, bool $markAsDownloaded = false, bool $vodz = false)
     {
 
         /** @var dmFile[] $attachments */
-        $attachments = $this->dataBox->DmOperationsWebService()->MessageDownload(
-            new tIDMessInput($dataMessageId),
-        )->getDmReturnedMessage()->getDmDm()->getDmFiles()->getDmFile();
+        if ($vodz) {
+            $attachments = $this->dataBox->DmVoDZ()->BigMessageDownload(
+                new tIDMessInput($dataMessageId),
+            )->getDmReturnedMessage()->getDmDm()->getDmFiles()->getDmFile();
+        } else {
+            $attachments = $this->dataBox->DmOperationsWebService()->MessageDownload(
+                new tIDMessInput($dataMessageId),
+            )->getDmReturnedMessage()->getDmDm()->getDmFiles()->getDmFile();
+        }
         $files = [];
 
         if ($markAsDownloaded) {
